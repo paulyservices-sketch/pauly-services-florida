@@ -668,6 +668,59 @@ textarea { resize: vertical; }
   color: var(--muted);
 }
 
+/* ===== SERVICE AREA ===== */
+.area-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.area-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.area-card:hover {
+  border-color: rgba(37,99,235,0.4);
+  transform: translateY(-3px);
+}
+.area-card-gp {
+  border-color: rgba(245,158,11,0.3);
+  background: rgba(245,158,11,0.04);
+}
+.area-icon { font-size: 1.6rem; margin-bottom: 10px; }
+.area-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+.area-note { font-size: 0.78rem; color: var(--gold); margin-bottom: 12px; font-weight: 500; }
+.area-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.area-list li {
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding-left: 12px;
+  position: relative;
+}
+.area-list li::before { content: '·'; position: absolute; left: 0; color: var(--blue2); }
+
+.area-note-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(37,99,235,0.08);
+  border: 1px solid rgba(37,99,235,0.2);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  font-size: 0.92rem;
+}
+.area-note-box span { font-size: 1.8rem; flex-shrink: 0; }
+.area-note-box a { color: var(--gold); font-weight: 600; }
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
   .nav-links, .nav-phone { display: none; }
