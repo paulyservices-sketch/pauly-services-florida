@@ -107,7 +107,7 @@ a { text-decoration: none; color: inherit; }
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: var(--bg);
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(14,165,233,0.09) 0%, var(--bg) 70%);
 }
 .hero-orb {
   position: absolute;
@@ -141,14 +141,47 @@ a { text-decoration: none; color: inherit; }
   66% { transform: translate(-20px, 30px) scale(0.97); }
 }
 
-/* Grid pattern overlay */
+/* Grid pattern overlay — blueprint pipe grid */
 .hero-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(14,165,233,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(14,165,233,0.04) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(14,165,233,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14,165,233,0.06) 1px, transparent 1px),
+    radial-gradient(circle, rgba(14,165,233,0.12) 2px, transparent 2px);
+  background-size: 60px 60px, 60px 60px, 60px 60px;
+  background-position: 0 0, 0 0, 30px 30px;
+}
+
+/* Animated water bubbles */
+.bubbles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.bub {
+  position: absolute;
+  bottom: -60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(34,211,238,0.35), rgba(14,165,233,0.08));
+  border: 1px solid rgba(34,211,238,0.2);
+  animation: bubble-rise linear infinite;
+}
+.bub-1  { width:18px;height:18px;left:8%;  animation-duration:9s; animation-delay:0s;   }
+.bub-2  { width:30px;height:30px;left:18%; animation-duration:13s;animation-delay:-3s;  }
+.bub-3  { width:12px;height:12px;left:32%; animation-duration:8s; animation-delay:-6s;  }
+.bub-4  { width:24px;height:24px;left:47%; animation-duration:11s;animation-delay:-1.5s;}
+.bub-5  { width:16px;height:16px;left:60%; animation-duration:10s;animation-delay:-8s;  }
+.bub-6  { width:36px;height:36px;left:72%; animation-duration:14s;animation-delay:-4s;  }
+.bub-7  { width:10px;height:10px;left:83%; animation-duration:7s; animation-delay:-2s;  }
+.bub-8  { width:20px;height:20px;left:92%; animation-duration:12s;animation-delay:-7s;  }
+@keyframes bubble-rise {
+  0%   { transform:translateY(0) scale(0.6); opacity:0; }
+  10%  { opacity:0.7; }
+  85%  { opacity:0.3; }
+  100% { transform:translateY(-110vh) scale(1.1); opacity:0; }
 }
 
 /* Pipe flow animation across bottom */
@@ -342,6 +375,19 @@ a { text-decoration: none; color: inherit; }
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--border), transparent);
 }
+.section-dark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 40px,
+    rgba(14,165,233,0.015) 40px,
+    rgba(14,165,233,0.015) 41px
+  );
+  pointer-events: none;
+}
 
 .section-label {
   font-size: 0.72rem;
@@ -494,6 +540,69 @@ a { text-decoration: none; color: inherit; }
 .promo-price .was { font-size: 0.8rem; color: var(--muted); text-decoration: line-through; }
 .promo-price .now { font-size: 1.8rem; font-weight: 900; color: var(--gold); line-height: 1; }
 .promo-price .label { font-size: 0.7rem; color: var(--muted); }
+
+/* ===== WORRY-FREE ADD-ON CARD ===== */
+.worry-free-cat {
+  border-color: rgba(74,222,128,0.3) !important;
+  background: rgba(74,222,128,0.04) !important;
+  position: relative;
+  overflow: hidden;
+}
+.worry-free-cat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--green), var(--cyan), var(--green));
+  animation: shimmer 3s linear infinite;
+}
+.worry-free-box {
+  background: rgba(74,222,128,0.06);
+  border: 1px solid rgba(74,222,128,0.2);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+.wf-price {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--green);
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.wf-per { font-size: 0.9rem; font-weight: 500; color: var(--muted); }
+.wf-desc { font-size: 0.88rem; color: var(--text); margin-bottom: 8px; line-height: 1.6; }
+.wf-note { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+
+/* Worry-Free checkbox in booking form */
+.worry-free-check {
+  background: rgba(74,222,128,0.06);
+  border: 1px solid rgba(74,222,128,0.25);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.wf-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text) !important;
+  letter-spacing: 0 !important;
+}
+.wf-label input[type="checkbox"] {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: var(--green);
+}
+.wf-tag {
+  font-size: 0.77rem;
+  color: var(--green);
+  font-weight: 500;
+  display: block;
+  margin-top: 2px;
+}
 
 /* ===== PRICE COMPARISON TABLE ===== */
 .compare-table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }

@@ -1,0 +1,11 @@
+[Unit]
+Description=Paul Services Booking API
+
+[Service]
+User=paul
+WorkingDirectory=/home/paul/nanoclaw/pauly-services-website/api/
+ExecStart=/usr/bin/python3 /home/paul/nanoclaw/pauly-services-website/api/book.py
+Restart=always
+
+[Install]
+WantedBy=default.target
