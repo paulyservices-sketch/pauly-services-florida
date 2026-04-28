@@ -78,45 +78,19 @@ const btnText = document.getElementById('btn-text');
 const btnLoading = document.getElementById('btn-loading');
 const successBox = document.getElementById('booking-success');
 
-// Dashboard endpoints — tries tunnel (port 5001 via Cloudflare) then localhost fallback
-const DASHBOARD_URLS = [
-  'https://pauly-dashboard.trycloudflare.com/api/book', // stable tunnel (when configured)
-  'http://localhost:5001/api/book',
-];
-
-async function submitToDashboard(payload) {
-  for (const url of DASHBOARD_URLS) {
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(6000),
-      });
-      if (res.ok) return true;
-    } catch (_) { /* try next */ }
-  }
-  return false;
-}
-
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const worryFreeEl = form.querySelector('[name="worry_free"]');
-  const payload = {
-    name:         form.name.value.trim(),
-    phone:        form.phone.value.trim(),
-    email:        form.email.value.trim(),
-    address:      form.address.value.trim(),
-    service:      form.service.value,
-    description:  `Service: ${form.service.value}\nUrgency: ${form.urgency.value}\nNotes: ${form.notes.value.trim() || 'None'}`,
-    urgent:       form.urgency.value,
-    worry_free:   worryFreeEl && worryFreeEl.checked ? 'yes' : 'no',
-    source:       'website',
-    submitted_at: new Date().toISOString(),
-  };
+  const worryFree = worryFreeEl && worryFreeEl.checked ? 'Yes (+$47)' : 'No';
 
-  if (!payload.name || !payload.phone || !payload.address || !payload.service || !payload.urgent) {
+  const name    = form.name.value.trim();
+  const phone   = form.phone.value.trim();
+  const address = form.address.value.trim();
+  const service = form.service.value;
+  const urgency = form.urgency.value;
+
+  if (!name || !phone || !address || !service || !urgency) {
     alert('Please fill out all required fields.');
     return;
   }
@@ -125,9 +99,32 @@ form.addEventListener('submit', async (e) => {
   btnLoading.style.display = 'inline';
   submitBtn.disabled = true;
 
-  const sent = await submitToDashboard(payload);
-  if (!sent) {
-    // Offline fallback — save locally so Paul can recover it
+  const payload = {
+    access_key:  document.getElementById('w3f-key').value,
+    subject:     `New Booking — ${name} — ${service.split('—')[0].trim()}`,
+    from_name:   'Pauly Services Website',
+    name,
+    phone,
+    email:       form.email.value.trim() || '(not provided)',
+    address,
+    service,
+    urgency,
+    worry_free:  worryFree,
+    notes:       form.notes.value.trim() || '(none)',
+    submitted_at: new Date().toLocaleString('en-US', { timeZone: 'America/Detroit' }),
+  };
+
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'submit failed');
+  } catch (err) {
+    console.error('Web3Forms error:', err);
+    // Save locally as backup so no booking is ever lost
     localStorage.setItem('pauly_booking_' + Date.now(), JSON.stringify(payload));
   }
 
