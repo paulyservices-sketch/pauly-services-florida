@@ -78,22 +78,45 @@ const btnText = document.getElementById('btn-text');
 const btnLoading = document.getElementById('btn-loading');
 const successBox = document.getElementById('booking-success');
 
+// Dashboard endpoints — tries tunnel (port 5001 via Cloudflare) then localhost fallback
+const DASHBOARD_URLS = [
+  'https://pauly-dashboard.trycloudflare.com/api/book', // stable tunnel (when configured)
+  'http://localhost:5001/api/book',
+];
+
+async function submitToDashboard(payload) {
+  for (const url of DASHBOARD_URLS) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(6000),
+      });
+      if (res.ok) return true;
+    } catch (_) { /* try next */ }
+  }
+  return false;
+}
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const data = {
-    name: form.name.value.trim(),
-    phone: form.phone.value.trim(),
-    email: form.email.value.trim(),
-    address: form.address.value.trim(),
-    service: form.service.value,
-    urgency: form.urgency.value,
-    notes: form.notes.value.trim(),
-    source: 'website',
+  const worryFreeEl = form.querySelector('[name="worry_free"]');
+  const payload = {
+    name:         form.name.value.trim(),
+    phone:        form.phone.value.trim(),
+    email:        form.email.value.trim(),
+    address:      form.address.value.trim(),
+    service:      form.service.value,
+    description:  `Service: ${form.service.value}\nUrgency: ${form.urgency.value}\nNotes: ${form.notes.value.trim() || 'None'}`,
+    urgent:       form.urgency.value,
+    worry_free:   worryFreeEl && worryFreeEl.checked ? 'yes' : 'no',
+    source:       'website',
     submitted_at: new Date().toISOString(),
   };
 
-  if (!data.name || !data.phone || !data.address || !data.service || !data.urgency) {
+  if (!payload.name || !payload.phone || !payload.address || !payload.service || !payload.urgent) {
     alert('Please fill out all required fields.');
     return;
   }
@@ -102,31 +125,10 @@ form.addEventListener('submit', async (e) => {
   btnLoading.style.display = 'inline';
   submitBtn.disabled = true;
 
-  try {
-    const res = await fetch('http://localhost:5001/api/tickets', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        customer_name: data.name,
-        address: data.address,
-        phone: data.phone,
-        email: data.email,
-        description: `${data.service}\n\nUrgency: ${data.urgency}\n\nNotes: ${data.notes || 'None'}`,
-        status: 'New',
-        source: 'Website Booking',
-      }),
-    });
-    if (!res.ok) throw new Error();
-  } catch (_) {
-    try {
-      await fetch('/api/book', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-    } catch (_) {
-      localStorage.setItem('pauly_booking_' + Date.now(), JSON.stringify(data));
-    }
+  const sent = await submitToDashboard(payload);
+  if (!sent) {
+    // Offline fallback — save locally so Paul can recover it
+    localStorage.setItem('pauly_booking_' + Date.now(), JSON.stringify(payload));
   }
 
   form.style.display = 'none';
