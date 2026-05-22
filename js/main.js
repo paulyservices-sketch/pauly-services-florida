@@ -128,6 +128,26 @@ form.addEventListener('submit', async (e) => {
     localStorage.setItem('pauly_booking_' + Date.now(), JSON.stringify(payload));
   }
 
+  // Send to GCE backend to create ticket + website lead in Firestore
+  try {
+    await fetch('http://34.46.22.83:5003/api/website-booking', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        name:    payload.name,
+        phone:   payload.phone,
+        address: payload.address,
+        email:   payload.email,
+        service: payload.service,
+        urgency: payload.urgency,
+        notes:   payload.notes,
+        source:  'website_fl',
+      }),
+    });
+  } catch (err) {
+    console.error('Backend booking error:', err);
+  }
+
   form.style.display = 'none';
   successBox.style.display = 'block';
   successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
